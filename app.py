@@ -25,7 +25,7 @@ DEFAULT_MAX_INPUT_WIDTH = 600
 
 
 # ----------------------------
-# TEXTS (exactly as you wanted)
+# TEXTS
 # ----------------------------
 TITLE_CONTENT = "Content-aware resized image."
 DESC_CONTENT = "This is the result of resizing the image using seam carving."
@@ -47,7 +47,7 @@ DESC_NAIVE = (
 
 
 # ----------------------------
-# CRAZY PREMIUM LIGHT DESIGN (NO SIDEBAR)
+
 # ----------------------------
 st.markdown(
     """
@@ -369,7 +369,7 @@ def show_panel(placeholder, image_array, title, desc, width, focus=False, theme=
 
 
 # ----------------------------
-# TOP TITLE (NO FRAME)
+
 # ----------------------------
 st.markdown(
     """
@@ -387,7 +387,7 @@ st.markdown(
 
 
 # ----------------------------
-# CONTROLS ON MAIN PAGE (WOW)
+
 # ----------------------------
 st.markdown('<div class="controls-wrap">', unsafe_allow_html=True)
 st.markdown(
@@ -455,7 +455,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ----------------------------
-# MAIN ANIMATION (DIRECTLY)
+# MAIN ANIMATION
 # ----------------------------
 if uploaded:
     if "cur_img" not in st.session_state or reset:
@@ -483,7 +483,6 @@ if uploaded:
     naive0 = cv2.resize(original, (cur.shape[1], cur.shape[0]), interpolation=cv2.INTER_AREA)
     e0 = normalize_energy(energy_map(cur))
 
-    #  focus ONLY for Original + Naive
     show_panel(ph_original, original, TITLE_ORIGINAL, DESC_ORIGINAL, width=int(original.shape[1] * vis_scale),
                focus=True, theme="blue", badge_text="ORIGINAL (START)")
 
@@ -518,7 +517,6 @@ if uploaded:
                 unsafe_allow_html=True
             )
 
-            #  focus ONLY for Original + Naive during animation too
             show_panel(ph_original, original, TITLE_ORIGINAL, DESC_ORIGINAL, width=int(original.shape[1] * vis_scale),
                        focus=True, theme="blue", badge_text="ORIGINAL (START)")
 

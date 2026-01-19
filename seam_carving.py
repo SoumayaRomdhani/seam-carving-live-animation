@@ -3,7 +3,7 @@ import cv2
 
 
 # ----------------------------
-# Energy map (fast)
+# Energy map
 # ----------------------------
 def to_gray(img_rgb: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
@@ -84,7 +84,7 @@ def overlay_seam(img_rgb: np.ndarray, seam: np.ndarray) -> np.ndarray:
 
 
 # ----------------------------
-# Generators (LIVE animation)
+# Generators
 # ----------------------------
 def carve_vertical_generator(img_rgb: np.ndarray, k: int):
     """

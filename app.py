@@ -4,6 +4,7 @@ from PIL import Image
 import io
 import time
 import cv2
+import base64
 
 from seam_carving import energy_map, carve_vertical_generator, carve_horizontal_generator
 
@@ -38,7 +39,7 @@ DESC_ENERGY = (
     "The white seam is a vertical path that traverses the least important pixels. On each iteration of the algorithm, this seam is removed."
 )
 
-TITLE_NAIVE = "Naively-resized image."
+TITLE_NAIVE = "Resized image."
 DESC_NAIVE = (
     "This is the result of the browser resizing the image without regard to the image content. "
     "This is shown for comparison purposes."
@@ -164,7 +165,7 @@ div[data-testid="stSlider"]{
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
-/*  Bigger widget text */
+/* Bigger widget text */
 div[data-testid="stSelectbox"] div,
 div[data-testid="stSlider"]{
     font-size: 1.08rem !important;
@@ -193,6 +194,7 @@ div.stButton > button{
     font-weight: 990 !important;
     font-size: 1.25rem !important;
     padding: 0.95rem 1.05rem;
+
     background: linear-gradient(135deg,#2563eb,#7c3aed,#ec4899);
     box-shadow: 0 16px 30px rgba(37,99,235,0.22);
     transition: 0.18s ease;
@@ -206,14 +208,13 @@ div.stButton > button:active{
     transform: translateY(0px) scale(0.99);
 }
 
-/* description box bigger + clearer */
+/* description box */
 .desc-box{
     background:#f6f9ff;
     border:1px solid #cfd8ea;
     border-top:0px;
     padding:16px 16px;
     border-radius: 0 0 12px 12px;
-
     font-size:18px;
     line-height:1.70rem;
 }
@@ -239,10 +240,65 @@ img{
     background: rgba(255,255,255,0.96);
     border: 1px solid rgba(0,0,0,0.10);
     box-shadow: 0 12px 22px rgba(0,0,0,0.08);
-
     font-weight: 990;
     font-size: 1.45rem;
     color: #111;
+}
+
+/* ==========================================================
+    FOCUS PANELS (Original + Naive)
+   ========================================================== */
+.panel-focus{
+    border-radius: 18px;
+    padding: 12px;
+    backdrop-filter: blur(14px);
+    background: rgba(255,255,255,0.55);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.08);
+}
+
+/* Original = blue focus */
+.panel-focus.blue{
+    border: 1px solid rgba(37,99,235,0.25);
+    box-shadow: 0 18px 48px rgba(37,99,235,0.12);
+}
+.panel-focus.blue .focus-badge{
+    background: rgba(37,99,235,0.12);
+    border: 1px solid rgba(37,99,235,0.22);
+    color: #2563eb;
+}
+
+/* Naive = pink focus */
+.panel-focus.pink{
+    border: 1px solid rgba(236,72,153,0.22);
+    box-shadow: 0 18px 48px rgba(236,72,153,0.10);
+}
+.panel-focus.pink .focus-badge{
+    background: rgba(236,72,153,0.10);
+    border: 1px solid rgba(236,72,153,0.20);
+    color: #ec4899;
+}
+
+.focus-badge{
+    display:inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 950;
+    font-size: 0.95rem;
+    margin: 0 0 10px 0;
+}
+
+/* make focus title colored + stronger */
+.panel-focus.blue .desc-title{ color:#2563eb; }
+.panel-focus.pink .desc-title{ color:#ec4899; }
+
+/* slightly tinted desc background inside focus */
+.panel-focus.blue .desc-box{
+    background: rgba(240,247,255,0.95);
+    border-color: rgba(37,99,235,0.18);
+}
+.panel-focus.pink .desc-box{
+    background: rgba(255,242,250,0.95);
+    border-color: rgba(236,72,153,0.16);
 }
 </style>
 """,
@@ -268,19 +324,48 @@ def overlay_white_seam_on_energy(e_gray_u8: np.ndarray, seam_img_rgb: np.ndarray
     return energy_rgb
 
 
-def show_panel(placeholder, image_array, title, desc, width):
+def to_base64_png(image_array: np.ndarray) -> str:
+    """Convert numpy image to base64 PNG (for focus panels)."""
+    pil_img = Image.fromarray(image_array)
+    buf = io.BytesIO()
+    pil_img.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode("utf-8")
+
+
+def show_panel(placeholder, image_array, title, desc, width, focus=False, theme="blue", badge_text="KEY VIEW"):
+    """
+    focus=False -> normal panel
+    focus=True  -> highlighted panel (glass + soft color + colored title)
+    """
     placeholder.empty()
     with placeholder.container():
-        st.image(image_array, width=width)
-        st.markdown(
-            f"""
-            <div class="desc-box">
-              <span class="desc-title">{title}</span>
-              <span class="desc-text"> {desc}</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        if focus:
+            b64 = to_base64_png(image_array)
+            st.markdown(
+                f"""
+                <div class="panel-focus {theme}">
+                    <div class="focus-badge">{badge_text}</div>
+                    <img src="data:image/png;base64,{b64}"
+                         style="width:{width}px; max-width:100%; display:block; border-radius:12px 12px 0 0;" />
+                    <div class="desc-box">
+                      <span class="desc-title">{title}</span>
+                      <span class="desc-text"> {desc}</span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        else:
+            st.image(image_array, width=width)
+            st.markdown(
+                f"""
+                <div class="desc-box">
+                  <span class="desc-title">{title}</span>
+                  <span class="desc-text"> {desc}</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 
 # ----------------------------
@@ -315,7 +400,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# layout: uploader / direction / k / play / reset
 c1, c2, c3, c4, c5 = st.columns([2.2, 1.3, 2.6, 1.0, 1.0])
 
 with c1:
@@ -324,14 +408,8 @@ with c1:
 
 with c2:
     st.markdown('<div class="field-label">Direction</div>', unsafe_allow_html=True)
-    direction = st.selectbox(
-        "",
-        ["Vertical", "Horizontal"],
-        index=1,  # default horizontal
-        label_visibility="collapsed"
-    )
+    direction = st.selectbox("", ["Vertical", "Horizontal"], index=1, label_visibility="collapsed")
 
-# placeholder for buttons if no upload
 play = False
 reset = False
 k = 50
@@ -340,7 +418,6 @@ if uploaded:
     img = Image.open(uploaded).convert("RGB")
     img_np = np.array(img)
 
-    # speed mode ON (hidden)
     H, W = img_np.shape[:2]
     if DEFAULT_SPEED_MODE and W > DEFAULT_MAX_INPUT_WIDTH:
         scale = DEFAULT_MAX_INPUT_WIDTH / W
@@ -354,13 +431,7 @@ if uploaded:
 
     with c3:
         st.markdown('<div class="field-label">k seams to remove</div>', unsafe_allow_html=True)
-        k = st.slider(
-            "",
-            1,
-            min(300, max_k),
-            default_k,
-            label_visibility="collapsed"
-        )
+        k = st.slider("", 1, min(300, max_k), default_k, label_visibility="collapsed")
 
     with c4:
         st.markdown('<div class="field-label">&nbsp;</div>', unsafe_allow_html=True)
@@ -369,7 +440,6 @@ if uploaded:
     with c5:
         st.markdown('<div class="field-label">&nbsp;</div>', unsafe_allow_html=True)
         reset = st.button("⟲ Reset", use_container_width=True)
-
 else:
     with c3:
         st.markdown('<div class="field-label">k seams to remove</div>', unsafe_allow_html=True)
@@ -413,8 +483,13 @@ if uploaded:
     naive0 = cv2.resize(original, (cur.shape[1], cur.shape[0]), interpolation=cv2.INTER_AREA)
     e0 = normalize_energy(energy_map(cur))
 
-    show_panel(ph_original, original, TITLE_ORIGINAL, DESC_ORIGINAL, width=int(original.shape[1] * vis_scale))
-    show_panel(ph_naive, naive0, TITLE_NAIVE, DESC_NAIVE, width=int(cur.shape[1] * vis_scale))
+    #  focus ONLY for Original + Naive
+    show_panel(ph_original, original, TITLE_ORIGINAL, DESC_ORIGINAL, width=int(original.shape[1] * vis_scale),
+               focus=True, theme="blue", badge_text="ORIGINAL (START)")
+
+    show_panel(ph_naive, naive0, TITLE_NAIVE, DESC_NAIVE, width=int(cur.shape[1] * vis_scale),
+               focus=True, theme="pink", badge_text="Resized (FINAL)")
+
     show_panel(ph_content, cur, TITLE_CONTENT, DESC_CONTENT, width=int(cur.shape[1] * vis_scale))
     show_panel(ph_energy, e0, TITLE_ENERGY, DESC_ENERGY, width=int(cur.shape[1] * vis_scale))
 
@@ -443,8 +518,13 @@ if uploaded:
                 unsafe_allow_html=True
             )
 
-            show_panel(ph_original, original, TITLE_ORIGINAL, DESC_ORIGINAL, width=int(original.shape[1] * vis_scale))
-            show_panel(ph_naive, naive, TITLE_NAIVE, DESC_NAIVE, width=int(cur_img.shape[1] * vis_scale))
+            #  focus ONLY for Original + Naive during animation too
+            show_panel(ph_original, original, TITLE_ORIGINAL, DESC_ORIGINAL, width=int(original.shape[1] * vis_scale),
+                       focus=True, theme="blue", badge_text="ORIGINAL (START)")
+
+            show_panel(ph_naive, naive, TITLE_NAIVE, DESC_NAIVE, width=int(cur_img.shape[1] * vis_scale),
+                       focus=True, theme="pink", badge_text="NAIVE (FINAL)")
+
             show_panel(ph_content, seam_img, TITLE_CONTENT, DESC_CONTENT, width=int(seam_img.shape[1] * vis_scale))
             show_panel(ph_energy, e_with_seam, TITLE_ENERGY, DESC_ENERGY, width=int(seam_img.shape[1] * vis_scale))
 

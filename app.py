@@ -523,7 +523,7 @@ if uploaded:
                        focus=True, theme="blue", badge_text="ORIGINAL (START)")
 
             show_panel(ph_naive, naive, TITLE_NAIVE, DESC_NAIVE, width=int(cur_img.shape[1] * vis_scale),
-                       focus=True, theme="pink", badge_text="NAIVE (FINAL)")
+                       focus=True, theme="pink", badge_text="Resized (FINAL)")
 
             show_panel(ph_content, seam_img, TITLE_CONTENT, DESC_CONTENT, width=int(seam_img.shape[1] * vis_scale))
             show_panel(ph_energy, e_with_seam, TITLE_ENERGY, DESC_ENERGY, width=int(seam_img.shape[1] * vis_scale))

@@ -5,7 +5,7 @@ Unlike naive resizing (stretching/shrinking), Seam Carving removes *low-energy* 
 
 ---
 
-## 🎯 Objective
+##  Objective
 
 Resize an image **without destroying the important content** (faces, objects, edges).  
 Visualize the algorithm **step-by-step** with:
@@ -17,7 +17,7 @@ Visualize the algorithm **step-by-step** with:
 
 ---
 
-## ✂️ What is Seam Carving?
+##  What is Seam Carving?
 
 Seam Carving removes **one seam at a time**:
 
@@ -36,7 +36,7 @@ This keeps the most important regions (**high-energy areas**) untouched.
 
 ---
 
-## ⚡ Energy Map
+##  Energy Map
 
 Energy represents pixel importance (edges/details).
 
@@ -44,12 +44,12 @@ In this project, energy is computed with Sobel gradients:
 
 - **Energy = |Sobel_x| + |Sobel_y|**
 
-✅ High energy ⇒ important pixels  
-✅ Low energy ⇒ pixels that can be removed safely
+** High energy ⇒ important pixels  
+** Low energy ⇒ pixels that can be removed safely
 
 ---
 
-## 🧠 Dynamic Programming (Minimum Seam)
+##  Dynamic Programming (Minimum Seam)
 
 To find the best seam efficiently, we use **Dynamic Programming**:
 
@@ -64,24 +64,24 @@ Complexity (per seam):
 
 ---
 
-## ✨ App Features
+##  App Features
 
-✅ Upload an image (JPG/PNG)  
-✅ Choose direction:
+** Upload an image (JPG/PNG)  
+** Choose direction:
 
 - Vertical seam removal
 - Horizontal seam removal
 
-✅ Select **k seams** to remove  
-✅ Press **Play** to watch seam carving step-by-step  
-✅ Seam overlay + energy visualization  
-✅ Download the final resized image as PNG  
+** Select **k seams** to remove  
+** Press **Play** to watch seam carving step-by-step  
+** Seam overlay + energy visualization  
+** Download the final resized image as PNG  
 
 ---
 
-## ▶️ How to Run the App (Local)
+##  How to Run the App (Local)
 
-### ✅ 1) Clone the repo
+###   Clone the repo
 
 ```bash
 git clone https://github.com/SoumayaRomdhani/seam-carving-live-animation.git
